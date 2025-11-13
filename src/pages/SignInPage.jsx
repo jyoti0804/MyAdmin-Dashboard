@@ -1,48 +1,61 @@
-// import { SignedIn, SignedOut, RedirectToSignIn } from "@clerk/clerk-react";
 
-// export default function SignInPage() {
-//   // Only return dashboard if signed in
-//   return (
-//     <>
-//       <SignedIn>
-//         {/* dashboard UI */}
-//       </SignedIn>
-//       <SignedOut>
-//         <RedirectToSignIn />
-//       </SignedOut>
-//     </>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// src/pages/SignInPage.jsx
-import React from "react";
+import React, { useState } from "react";
 import { SignIn } from "@clerk/clerk-react";
+import { SignInSkeleton } from "../components/signInSkeleton/SignInSkeleton";
 
 export default function SignInPage() {
-  // Determine redirect URL based on environment
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Listen for sign-in events (use Clerk events or monkey-patch as needed)
+  // Here’s a minimal concept: overlay skeleton on button click
+  const handleStartSubmit = () => setIsSubmitting(true);
+  const handleEndSubmit = () => setIsSubmitting(false);
+
   const redirectUrl = import.meta.env.PROD
-    ? "https://my-admin-dashboard-wb6u.vercel.app/" // production URL
-    : "http://localhost:5173/"; // development URL
+    ? "https://my-admin-dashboard-wb6u.vercel.app/"
+    : "http://localhost:5173/";
 
   return (
-    <SignIn
-      path="/sign-in"
-      routing="path"
-      signUpUrl="/sign-up"
-      redirectUrl={redirectUrl}
-    />
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        background: "rgba(243,244,246, 0.85)",
+        zIndex: 9999,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div style={{ position: "relative" }}>
+        <SignIn
+          path="/sign-in"
+          routing="path"
+          signUpUrl="/sign-up"
+          redirectUrl={redirectUrl}
+          appearance={{
+            elements: {
+              // Optional: style sign-in card itself via Clerk appearance prop
+            }
+          }}
+          // Optionally listen for Clerk events to trigger loading state!
+        />
+        {isSubmitting && (
+          <div
+            style={{
+              position: "absolute",
+              top: 0, left: 0, right: 0, bottom: 0,
+              zIndex: 10,
+              pointerEvents: "none" // Don't block clicks
+            }}
+          >
+            <SignInSkeleton />
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
